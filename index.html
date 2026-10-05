@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAnekdot Web - Media Pembelajaran Bahasa Indonesia Kelas X SMK</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        wa: {
+                            teal: '#00a884',
+                            darkTeal: '#008069',
+                            bg: '#efeae2',
+                            sidebar: '#ffffff',
+                            chatBg: '#efeae2',
+                            msgOut: '#d9fdd3',
+                            msgIn: '#ffffff',
+                            hover: '#f5f6f6',
+                            muted: '#667781',
+                            header: '#f0f2f5',
+                            border: '#e9edef'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .chat-wallpaper {
+            background-color: #efeae2;
+            background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+            background-size: 20px 20px;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cccccc;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b0b0b0;
+        }
+        /* Prose styling for AI formatted replies */
+        .markdown-body p { margin-bottom: 0.5rem; }
+        .markdown-body ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.5rem; }
+        .markdown-body ol { list-style-type: decimal; margin-left: 1.25rem; margin-bottom: 0.5rem; }
+        .markdown-body strong { font-weight: 600; color: #111827; }
+        .markdown-body em { font-style: italic; }
+        .markdown-body blockquote { border-left: 3px solid #00a884; padding-left: 0.75rem; color: #4b5563; font-style: italic; margin: 0.5rem 0; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans h-screen flex flex-col overflow-hidden text-gray-800 antialiased select-none">
+
+    <!-- WhatsApp Top Teal Accent Bar -->
+    <div class="h-8 bg-wa-teal w-full flex-none hidden md:block"></div>
+
+    <div class="flex-1 flex flex-col max-w-7xl w-full mx-auto md:my-0 shadow-2xl overflow-hidden bg-white relative">
+        
+        <!-- Header Top Bar -->
+        <header class="bg-wa-header border-b border-wa-border px-4 py-2.5 flex items-center justify-between flex-none">
+            <div class="flex items-center space-x-3">
+                <div class="bg-wa-teal text-white w-9 h-9 rounded-full flex items-center justify-center font-bold text-lg shadow">
+                    <i class="fa-solid fa-masks-theater"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-gray-800 leading-tight flex items-center gap-2">
+                        <span>WAnekdot Web</span>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full font-medium">Kelas X SMK</span>
+                    </h1>
+                    <p class="text-xs text-wa-muted">Media Pembelajaran Teks Anekdot & Bahasa Indonesia</p>
+                </div>
+            </div>
+
+            <!-- Header Right Action Tools -->
+            <div class="flex items-center space-x-3 text-wa-muted text-lg">
+                <button id="apiKeyBtn" title="Pengaturan Integrasi & API Key" class="hover:text-wa-teal transition p-1.5 rounded-full hover:bg-gray-200">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+                <button id="guideBtn" title="Panduan Penggunaan" class="hover:text-wa-teal transition p-1.5 rounded-full hover:bg-gray-200">
+                    <i class="fa-solid fa-circle-info"></i>
+                </button>
+                <div class="h-5 w-px bg-gray-300"></div>
+                <span class="text-xs text-gray-500 font-medium hidden sm:inline">PPG UMP 2026</span>
+            </div>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden relative">
+            
+            <!-- Left Sidebar (Contact & Feature List) -->
+            <div id="sidebar" class="w-full md:w-80 lg:w-96 bg-wa-sidebar border-r border-wa-border flex flex-col h-full z-20 transition-all duration-300">
+                
+                <!-- Search Input -->
+                <div class="p-2.5 bg-white border-b border-wa-border">
+                    <div class="bg-wa-header flex items-center px-3 py-1.5 rounded-lg border border-gray-200 focus-within:border-wa-teal transition">
+                        <i class="fa-solid fa-magnifying-glass text-wa-muted text-sm mr-3"></i>
+                        <input type="text" id="searchInput" placeholder="Cari percakapan materi..." class="bg-transparent text-sm w-full focus:outline-none text-gray-700 placeholder-wa-muted">
+                    </div>
+                </div>
+
+                <!-- Chat Contacts List Container -->
+                <div class="flex-1 overflow-y-auto divide-y divide-gray-100" id="chatList">
+                    <!-- Dynamic rendering via JS -->
+                </div>
+
+                <!-- Sidebar Footer Status -->
+                <div class="p-2.5 bg-gray-50 border-t border-wa-border text-center text-xs text-wa-muted flex items-center justify-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Sistem Pembelajaran Aktif & Interactive Bot</span>
+                </div>
+            </div>
+
+            <!-- Right Chat Window -->
+            <div id="chatWindow" class="flex-1 flex flex-col h-full bg-wa-chatBg chat-wallpaper relative w-full">
+                
+                <!-- Active Chat Header Bar -->
+                <div id="activeHeader" class="bg-wa-header border-b border-wa-border px-4 py-2.5 flex items-center justify-between flex-none z-10 shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <button id="backToListBtn" class="md:hidden text-wa-muted text-lg p-1.5 hover:text-gray-800">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <div id="activeAvatar" class="w-10 h-10 rounded-full bg-wa-teal text-white flex items-center justify-center font-bold text-lg flex-none shadow-sm">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h2 id="activeTitle" class="font-bold text-sm text-gray-800 truncate">Pilih Chat untuk Memulai</h2>
+                            <p id="activeSubtitle" class="text-xs text-wa-muted truncate">Online - Siap Membantu Belajar</p>
+                        </div>
+                    </div>
+
+                    <!-- Header Tools -->
+                    <div class="flex items-center space-x-2 text-wa-muted">
+                        <button id="clearChatBtn" title="Bersihkan Percakapan Ini" class="p-2 hover:bg-gray-200 rounded-full transition text-sm">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages Container -->
+                <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-3.5">
+                    <!-- Messages rendered dynamically -->
+                </div>
+
+                <!-- Typing / Status Indicator -->
+                <div id="typingIndicator" class="hidden px-4 py-1.5 text-xs text-wa-muted italic bg-white/80 backdrop-blur border-t border-wa-border flex items-center gap-2">
+                    <i class="fa-solid fa-circle-notch animate-spin text-wa-teal"></i>
+                    <span id="typingText">Gemini AI sedang memproses tanggapan...</span>
+                </div>
+
+                <!-- Input Message Bar -->
+                <div id="inputBar" class="bg-wa-header border-t border-wa-border px-3 py-2.5 flex items-center space-x-2 flex-none">
+                    <button class="text-wa-muted hover:text-wa-teal p-2 rounded-full text-lg">
+                        <i class="fa-regular fa-face-smile"></i>
+                    </button>
+                    <div class="flex-1 relative">
+                        <input type="text" id="messageInput" placeholder="Ketik pertanyaan atau balasan pesan di sini..." class="w-full bg-white text-sm py-2 px-4 rounded-lg border border-gray-200 focus:outline-none focus:border-wa-teal text-gray-800">
+                    </div>
+                    <button id="sendBtn" class="bg-wa-teal hover:bg-wa-darkTeal text-white w-10 h-10 rounded-full flex items-center justify-center shadow transition flex-none">
+                        <i class="fa-solid fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    <!-- API Key & Integration Settings Modal -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-wa-teal"></i> Pengaturan Integrasi System
+                </h3>
+                <button id="closeApiModal" class="text-gray-400 hover:text-gray-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4 text-xs text-gray-600 mb-5">
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">1. Gemini API Key (Opsional):</label>
+                    <input type="password" id="customApiKeyInput" placeholder="Masukkan Gemini API Key" class="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-wa-teal">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">2. Google Apps Script Web App URL (Spreadsheet):</label>
+                    <input type="text" id="webAppUrlInput" placeholder="https://script.google.com/macros/s/.../exec" class="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-wa-teal">
+                    <p class="text-[11px] text-gray-500 mt-1">Tempelkan URL Web App hasil deploy Apps Script Google Spreadsheet Anda di sini.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button id="saveApiKeyBtn" class="bg-wa-teal hover:bg-wa-darkTeal text-white text-xs font-semibold px-4 py-2 rounded-lg transition">
+                    Simpan Konfigurasi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panduan Modal -->
+    <div id="guideModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-wa-teal"></i> Panduan Fitur WAnekdot
+                </h3>
+                <button id="closeGuideModal" class="text-gray-400 hover:text-gray-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs text-gray-600 leading-relaxed">
+                <div class="p-2.5 bg-emerald-50 rounded-lg border border-emerald-100">
+                    <strong class="text-emerald-800 block text-sm mb-1"><i class="fa-solid fa-book-bookmark mr-1"></i> 1. KBBI VI</strong>
+                    Tanyakan kata baku/tidak baku (misal: <em>"Apakah kata 'anekdot' atau 'efektif' baku?"</em>).
+                </div>
+                <div class="p-2.5 bg-blue-50 rounded-lg border border-blue-100">
+                    <strong class="text-blue-800 block text-sm mb-1"><i class="fa-solid fa-pen-nib mr-1"></i> 2. EYD Versi V</strong>
+                    Tanyakan kaidah ejaan, penulisan huruf kapital, kata depan, dan tanda baca sesuai EYD V.
+                </div>
+                <div class="p-2.5 bg-purple-50 rounded-lg border border-purple-100">
+                    <strong class="text-purple-800 block text-sm mb-1"><i class="fa-solid fa-masks-theater mr-1"></i> 3. Asisten Teks Anekdot</strong>
+                    Diskusi dan konsultasi mengenai materi, fungsi sindiran, humor, serta struktur teks anekdot.
+                </div>
+                <div class="p-2.5 bg-amber-50 rounded-lg border border-amber-100">
+                    <strong class="text-amber-800 block text-sm mb-1"><i class="fa-solid fa-circle-play mr-1"></i> 4. Video Pembelajaran Audiovisual</strong>
+                    Menonton 6 video pembelajaran interaktif materi Teks Anekdot langsung dari dalam percakapan.
+                </div>
+                <div class="p-2.5 bg-teal-50 rounded-lg border border-teal-100">
+                    <strong class="text-teal-800 block text-sm mb-1"><i class="fa-solid fa-list-check mr-1"></i> 5. Bank Contoh & Struktur</strong>
+                    Mempelajari contoh teks anekdot beserta pembedahan 5 strukturnya secara detail.
+                </div>
+                <div class="p-2.5 bg-rose-50 rounded-lg border border-rose-100">
+                    <strong class="text-rose-800 block text-sm mb-1"><i class="fa-solid fa-feather-pointed mr-1"></i> 6. Mari Menulis (Guided Writing & Spreadsheet)</strong>
+                    Menulis karya teks anekdot secara bertahap bersama chatbot hingga tersimpan di database Google Spreadsheet.
+                </div>
+            </div>
+            <div class="mt-5 text-right">
+                <button id="closeGuideBtn2" class="bg-wa-teal text-white text-xs px-4 py-2 rounded-lg font-semibold hover:bg-wa-darkTeal">
+                    Mulai Belajar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store for Gemini API Key & Web App URL
+        let userGeminiApiKey = "";
+        let customWebAppUrl = "";
+
+        // Spreadsheet Target URL & Default Web App URL
+        const SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1XcECMrNPVBnOWhaVczu5aKWtOsBXThuOdV5AUrckfws/edit?usp=sharing";
+        let GOOGLE_APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbx_placeholder_for_ppg_anekdot/exec";
+        // Guided Writing Chatbot State
+        let writingState = {
+            step: 0,
+            data: {
+                noAuto: 1,
+                nama: '',
+                presensi: '',
+                judul: '',
+                abstrak: '',
+                orientasi: '',
+                krisis: '',
+                reaksi: '',
+                koda: '',
+                timestamp: ''
+            }
+        };
+
+        // Complete Chat Feature Configuration
+        const chatData = [
+            {
+                id: 'kbbi',
+                title: 'KBBI (Kamus Besar Bahasa Indonesia)',
+                subtitle: 'Pengecekan Kata Baku & Kosa Kata',
+                avatarBg: 'bg-emerald-600',
+                icon: 'fa-solid fa-book-bookmark',
+                systemInstruction: `Anda adalah Layanan KBBI (Kamus Besar Bahasa Indonesia) resmi versi VI untuk siswa SMK Kelas X. Tugas Anda adalah membantu murid memeriksa apakah suatu kata baku atau tidak baku, memberikan penulisan baku yang benar, serta memberikan arti/definisi kata sesuai KBBI secara ramah, ringkas, dan jelas.`,
+                initialMessages: [
+                    {
+                        sender: 'bot',
+                        time: '08.00',
+                        text: `Halo! 👋 Saya **Kamus Besar Bahasa Indonesia (KBBI)**.\n\nKamu bisa menanyakan kata apa saja untuk mengecek apakah kata tersebut **baku** atau **tidak baku**, serta mengetahui maknanya.\n\n*Contoh pertanyaan: "Apakah kata 'efektif' baku?" atau "Apa arti kata anekdot?"*`
+                    }
+                ]
+            },
+            {
+                id: 'eyd',
+                title: 'EYD Versi V',
+                subtitle: 'Pedoman Ejaan Yang Disempurnakan',
+                avatarBg: 'bg-blue-600',
+                icon: 'fa-solid fa-pen-nib',
+                systemInstruction: `Anda adalah Asisten Pakar EYD (Ejaan Yang Disempurnakan) Versi V. Tugas Anda membantu siswa SMK memahami tata cara penulisan huruf kapital, kata depan, tanda baca (koma, titik, tanda petik), imbuhan, dan tata bahasa Indonesia secara tepat berdasarkan peraturan tata bahasa resmi EYD V.`,
+                initialMessages: [
+                    {
+                        sender: 'bot',
+                        time: '08.01',
+                        text: `Selamat datang di konsultasi **EYD Versi V**! ✍️\n\nSilakan tanyakan aturan penulisan huruf kapital, tanda baca, kata depan (di/ke), atau kalimat efektif sesuai kaidah ejaan bahasa Indonesia terbaru.`
+                    }
+                ]
+            },
+            {
+                id: 'teks_anekdot',
+                title: 'Teks Anekdot',
+                subtitle: 'Asisten Pembelajaran Materi Anekdot',
+                avatarBg: 'bg-purple-600',
+                icon: 'fa-solid fa-masks-theater',
+                systemInstruction: `Anda adalah Guru/Asisten Pembelajaran Teks Anekdot Bahasa Indonesia Kelas X SMK. Tugas Anda menjawab segala pertanyaan siswa mengenai definisi, fungsi sosial, sindiran, humor, ciri kebahasaan (kalimat retoris, kata kerja aksi, konjungsi waktu), serta 5 struktur utama teks anekdot (Abstraksi, Orientasi, Krisis, Reaksi, Koda). Jawablah dengan bahasa komunikatif, edukatif, dan menyengangkan.`,
+                initialMessages: [
+                    {
+                        sender: 'bot',
+                        time: '08.02',
+                        text: `Halo para siswa Kelas X SMK! 🎭\n\nSaya adalah **Asisten Teks Anekdot**. Kamu bisa bertanya tentang apa saja seputar teks anekdot, mulai dari struktur, ciri kebahasaan, cara membuat sindiran yang santun, hingga perbedaan anekdot dengan humor biasa!`
+                    }
+                ]
+            },
+            {
+                id: 'video_materi',
+                title: 'Video Pembelajaran',
+                subtitle: 'Media Audiovisual Teks Anekdot',
+                avatarBg: 'bg-amber-500',
+                icon: 'fa-solid fa-circle-play',
+                type: 'video_list',
+                videos: [
+                    { id: 'DgAijZUXHMg', title: 'Materi Teks Anekdot Kelas X - Pengertian & Ciri Kebahasaan' },
+                    { id: 'XAc32gB8z_4', title: 'Struktur Teks Anekdot Lengkap Beserta Contohnya' },
+                    { id: 'WvK0OiYxlLE', title: 'Cara Mudah Memahami & Mengalisis Teks Anekdot' },
+                    { id: 'sT-PciO8le4', title: 'Perbedaan Teks Anekdot dan Humor Biasa' },
+                    { id: 'kLlhOzRmF54', title: 'Langkah-Langkah Menulis Teks Anekdot Sindiran Lucu' },
+                    { id: 'O9zgkA3o2Mo', title: 'Contoh Analisis Struktur Teks Anekdot dalam kehidupan sehari-hari' }
+                ],
+                initialMessages: [
+                    {
+                        sender: 'bot',
+                        time: '08.03',
+                        text: `Selamat datang di sesi **Media Audiovisual Teks Anekdot**! 🎥\n\nBerikut adalah 6 video pembelajaran pilihan untuk membantu kamu memahami materi teks anekdot secara visual dan interaktif. Silakan tonton video di bawah ini:`
+                    }
+                ]
+            },
+            {
+                id: 'contoh_struktur',
+                title: 'Contoh & Struktur Anekdot',
+                subtitle: 'Bank Contoh & Pembedahan Struktur',
+                avatarBg: 'bg-teal-600',
+                icon: 'fa-solid fa-list-check',
+                systemInstruction: `Anda adalah Pakar Penulis dan Analis Teks Anekdot. Tugas Anda memberikan contoh-contoh teks anekdot yang unik, lucu, dan bermakna sindiran sosial positif serta membedah strukturnya (Abstraksi, Orientasi, Krisis, Reaksi, Koda) secara mendalam sesuai pertanyaan siswa.`,
+                initialMessages: [
+                    {
+                        sender: 'bot',
+                        time: '08.04',
+                        text: `Berikut adalah contoh **Teks Anekdot** beserta bedah 5 strukturnya:\n\n📌 **Judul: Baju Termahal di Indonesia**\n\n1. **Abstraksi:**\nSuatu hari di ruang kantin gedung DPR, dua orang anggota dewan bernama Udin dan Amir sedang menikmati kopi saat jam istirahat.\n\n2. **Orientasi:**\nUdin membuka percakapan dengan bertanya, "Mir, menurutmu baju apa yang paling mahal di negara kita ini?"\n\n3. **Krisis:**\nAmir menjawab, "Ya jelas baju karya desainer ternama atau baju bertabur emas dong, Din!"\nUdin tersenyum geli lalu berkata, "Salah! Baju termahal itu adalah **Baju Tahanan KPK**!"\nAmir bingung, "Lho, kok bisa?"\nUdin menjelaskan, "Coba kamu pikir, seseorang harus mencuri uang rakyat hingga miliaran rupiah dulu baru bisa memakai baju oranye itu!"\n\n4. **Reaksi:**\nAmir tercengang seketika, lalu tertawa terbahak-bahak sambil membisikkan, "Betul juga kamu, Din!"\n\n5. **Koda:**\nMereka berdua pun melanjutkan meminum kopi sambil pura-pura tidak saling menatap baju kemeja kerja masing-masing.\n\n--- \n💡 *Ingin contoh teks anekdot topik lain (misal: Pendidikan, Lalu Lintas, atau Lingkungan)? Ketik pertanyaanmu di bawah!*`
+                    }
+                ]
+            },
+            {
+                id: 'mari_menulis',
+                title: 'Mari Menulis',
+                subtitle: 'Guided Chatbot & Integration Spreadsheet',
+                avatarBg: 'bg-rose-600',
+                icon: 'fa-solid fa-feather-pointed',
+                initialMessages: [
+                    {
+                        sender: 'bot',
+                        time: '08.05',
+                        text: `Selamat datang di fitur **Mari Menulis Teks Anekdot**! ✍️\n\nChatbot ini akan membimbingmu menyusun teks anekdot step-by-step. Hasil karya dan identitasmu akan langsung tersimpan di **Database Google Spreadsheet Kelas**.\n\nUntuk memulai, silakan ketik **NAMA LENGKAP** kamu:`
+                    }
+                ]
+            }
+        ];
+
+        // Messages Storage State
+        let messagesStore = {};
+        let activeChatId = 'kbbi';
+
+        function initStore() {
+            chatData.forEach(chat => {
+                messagesStore[chat.id] = [...chat.initialMessages];
+            });
+        }
+
+        function getFormattedTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            return `${hours}.${mins}`;
+        }
+
+        function renderChatList(filterText = '') {
+            const chatListContainer = document.getElementById('chatList');
+            chatListContainer.innerHTML = '';
+
+            chatData.forEach(chat => {
+                if (filterText && !chat.title.toLowerCase().includes(filterText.toLowerCase()) && !chat.subtitle.toLowerCase().includes(filterText.toLowerCase())) {
+                    return;
+                }
+
+                const isActive = chat.id === activeChatId;
+                const msgs = messagesStore[chat.id] || [];
+                const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : '';
+                const cleanLastMsg = lastMsg.replace(/[*_#`]/g, '').substring(0, 38) + (lastMsg.length > 38 ? '...' : '');
+                const lastTime = msgs.length > 0 ? msgs[msgs.length - 1].time : '08.00';
+
+                const chatItem = document.createElement('div');
+                chatItem.className = `p-3 flex items-center space-x-3 cursor-pointer transition border-b border-gray-50 ${isActive ? 'bg-wa-hover border-l-4 border-l-wa-teal' : 'hover:bg-gray-50'}`;
+                chatItem.onclick = () => switchChat(chat.id);
+
+                chatItem.innerHTML = `
+                    <div class="w-11 h-11 rounded-full ${chat.avatarBg} text-white flex items-center justify-center font-bold text-lg flex-none shadow-sm">
+                        <i class="${chat.icon}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline mb-0.5">
+                            <h3 class="font-bold text-xs md:text-sm text-gray-800 truncate">${chat.title}</h3>
+                            <span class="text-[10px] text-wa-muted">${lastTime}</span>
+                        </div>
+                        <p class="text-xs text-wa-muted truncate">${cleanLastMsg || chat.subtitle}</p>
+                    </div>
+                `;
+
+                chatListContainer.appendChild(chatItem);
+            });
+        }
+
+        function switchChat(chatId) {
+            activeChatId = chatId;
+            const chatConfig = chatData.find(c => c.id === chatId);
+
+            // Update Header
+            document.getElementById('activeTitle').innerText = chatConfig.title;
+            document.getElementById('activeSubtitle').innerText = chatConfig.subtitle;
+            
+            const avatarElem = document.getElementById('activeAvatar');
+            avatarElem.className = `w-10 h-10 rounded-full ${chatConfig.avatarBg} text-white flex items-center justify-center font-bold text-lg flex-none shadow-sm`;
+            avatarElem.innerHTML = `<i class="${chatConfig.icon}"></i>`;
+
+            // Mobile view toggle
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('hidden');
+                document.getElementById('chatWindow').classList.remove('hidden');
+            }
+
+            renderMessages();
+            renderChatList();
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '';
+
+            const msgs = messagesStore[activeChatId] || [];
+
+            msgs.forEach(msg => {
+                appendMessageToDOM(msg, false);
+            });
+
+            // Special rendering for Video List in Chat 4
+            if (activeChatId === 'video_materi') {
+                const videoChat = chatData.find(c => c.id === 'video_materi');
+                if (videoChat && videoChat.videos) {
+                    renderVideoEmbeds(container, videoChat.videos);
+                }
+            }
+
+            // Special rendering for End Session Button if state completed in Mari Menulis
+            if (activeChatId === 'mari_menulis' && writingState.step >= 8) {
+                renderEndSessionButton();
+            }
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendMessageToDOM(msg, autoScroll = true) {
+            const container = document.getElementById('messagesContainer');
+            const isUser = msg.sender === 'user';
+
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-2.5`;
+
+            const formattedText = parseMarkdown(msg.text);
+
+            wrapper.innerHTML = `
+                <div class="max-w-[88%] md:max-w-[75%] rounded-lg px-3 py-2 shadow-xs text-xs md:text-sm relative ${isUser ? 'bg-wa-msgOut text-gray-800 rounded-tr-none' : 'bg-wa-msgIn text-gray-800 rounded-tl-none border border-gray-100'}">
+                    <div class="markdown-body leading-relaxed">${formattedText}</div>
+                    <div class="text-[10px] text-wa-muted text-right mt-1 flex items-center justify-end gap-1">
+                        <span>${msg.time}</span>
+                        ${isUser ? '<i class="fa-solid fa-check-double text-blue-500"></i>' : ''}
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(wrapper);
+            if (autoScroll) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        function parseMarkdown(text) {
+            if (!text) return '';
+            let parsed = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            // Bold
+            parsed = parsed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Italic
+            parsed = parsed.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            // Links
+            parsed = parsed.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="text-wa-teal underline font-semibold hover:text-wa-darkTeal">$1</a>');
+            // Line breaks
+            parsed = parsed.replace(/\n/g, '<br>');
+
+            return parsed;
+        }
+
+        function renderVideoEmbeds(container, videos) {
+            const mediaWrapper = document.createElement('div');
+            mediaWrapper.className = 'my-3 bg-white/95 p-3 rounded-xl border border-gray-200 shadow-sm space-y-4';
+            
+            let videosHtml = `
+                <div class="font-bold text-xs text-wa-darkTeal border-b border-gray-200 pb-2 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-brands fa-youtube text-red-600 text-base"></i> Video Pembelajaran Teks Anekdot (6 Video)
+                    </span>
+                    <span class="text-[10px] text-gray-500 font-normal">Putar langsung di bawah ini:</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            `;
+
+            videos.forEach((vid, idx) => {
+                videosHtml += `
+                    <div class="bg-gray-50 rounded-lg overflow-hidden border border-gray-200 shadow-xs flex flex-col">
+                        <div class="relative pt-[56.25%] bg-black">
+                            <iframe 
+                                class="absolute top-0 left-0 w-full h-full" 
+                                src="https://www.youtube-nocookie.com/embed/${vid.id}" 
+                                title="${vid.title}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        <div class="p-2 flex-1 flex flex-col justify-between bg-white">
+                            <span class="text-[11px] font-semibold text-gray-800 line-clamp-2">#${idx+1} ${vid.title}</span>
+                            <div class="mt-2 text-right">
+                                <a href="https://www.youtube.com/watch?v=${vid.id}" target="_blank" class="text-[10px] text-wa-teal hover:underline font-medium inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka di YouTube
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            videosHtml += `</div>`;
+            mediaWrapper.innerHTML = videosHtml;
+            container.appendChild(mediaWrapper);
+        }
+
+        async function handleSendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            input.value = '';
+            
+            // Record User Message
+            const userMsg = {
+                sender: 'user',
+                time: getFormattedTime(),
+                text: text
+            };
+
+            messagesStore[activeChatId].push(userMsg);
+            appendMessageToDOM(userMsg);
+
+            // Handle current active chat feature logic
+            if (activeChatId === 'mari_menulis') {
+                handleMariMenulisFlow(text);
+            } else {
+                // Gemini AI call for other chats
+                await callGeminiAIForChat(activeChatId, text);
+            }
+
+            renderChatList();
+        }
+
+        function handleMariMenulisFlow(userText) {
+            const stepsPrompt = [
+                { field: 'nama', nextPrompt: 'Terima kasih! Sekarang masukkan **NOMOR PRESENSI** kamu:' },
+                { field: 'presensi', nextPrompt: 'Sip! Selanjutnya tuliskan **TEMA / JUDUL TEKS ANEKDOT** yang akan kamu buat:' },
+                { field: 'judul', nextPrompt: 'Bagus sekali! Sekarang tuliskan bagian **ABSTRAKSI** (Gambaran umum/pendahuluan cerita):' },
+                { field: 'abstrak', nextPrompt: 'Lanjut! Tuliskan bagian **ORIENTASI** (Latar belakang atau situasi awal kejadian):' },
+                { field: 'orientasi', nextPrompt: 'Mantap! Sekarang tuliskan bagian **KRISIS** (Puncak masalah lucu/sindiran utama):' },
+                { field: 'krisis', nextPrompt: 'Keren! Tuliskan bagian **REAKSI** (Langkah atau cara menyelesaikan masalah krisis tersebut):' },
+                { field: 'reaksi', nextPrompt: 'Hampir selesai! Tuliskan bagian **KODA** (Penutup, kesimpulan, atau perubahan kondisi akhir cerita):' },
+                { field: 'koda', nextPrompt: null }
+            ];
+
+            const current = stepsPrompt[writingState.step];
+
+            if (current) {
+                // Save user response into current field
+                writingState.data[current.field] = userText;
+
+                if (current.nextPrompt) {
+                    // Move to next step and ask next question
+                    writingState.step++;
+                    setTimeout(() => {
+                        const botReply = {
+                            sender: 'bot',
+                            time: getFormattedTime(),
+                            text: current.nextPrompt
+                        };
+                        messagesStore['mari_menulis'].push(botReply);
+                        appendMessageToDOM(botReply);
+                        renderChatList();
+                    }, 600);
+                } else {
+                    // Completed step 7 (koda submitted) -> Finish session
+                    writingState.step = 8;
+                    setTimeout(async () => {
+                        writingState.data.timestamp = new Date().toLocaleString('id-ID');
+                        
+                        // Submit to Spreadsheet
+                        await submitToSpreadsheet(writingState.data);
+
+                        const summaryText = `🎉 **SELAMAT! KARYA TEKS ANEKDOT KAMU BERHASIL DISUSUN!** 🎉
+
+Data telah tersimpan secara otomatis di Database Google Spreadsheet PPG Calon Guru UMP 2026.
+
+---
+📋 **RANGKUMAN HASIL KARYA SISWA:**
+- **Nama Lengkap:** ${writingState.data.nama}
+- **Nomor Presensi:** ${writingState.data.presensi}
+- **Judul Anekdot:** ${writingState.data.judul}
+
+**1. Abstraksi:**
+${writingState.data.abstrak}
+
+**2. Orientasi:**
+${writingState.data.orientasi}
+
+**3. Krisis:**
+${writingState.data.krisis}
+
+**4. Reaksi:**
+${writingState.data.reaksi}
+
+**5. Koda:**
+${writingState.data.koda}
+---
+
+🔗 **Akses Database Google Spreadsheet:**
+[Klik di sini untuk melihat Tabel Database Kelas](${SPREADSHEET_URL})
+
+Klik tombol **"Selesai & Ganti Murid Lain"** di bawah ini untuk mengakhiri sesi penulisan dan berpindah ke baris database pengguna berikutnya.`;
+
+                        const finalBotReply = {
+                            sender: 'bot',
+                            time: getFormattedTime(),
+                            text: summaryText
+                        };
+                        messagesStore['mari_menulis'].push(finalBotReply);
+                        appendMessageToDOM(finalBotReply);
+
+                        // Add Reset Button Component into DOM
+                        renderEndSessionButton();
+                        renderChatList();
+                    }, 800);
+                }
+            } else {
+                // If user sends message after completion
+                setTimeout(() => {
+                    const infoReply = {
+                        sender: 'bot',
+                        time: getFormattedTime(),
+                        text: `Sesi penulisan kamu sudah selesai dan data sudah tersimpan. Jika ingin menulis kembali atau berganti ke murid lain, silakan tekan tombol **"Selesai & Ganti Murid (Baris Baru)"** di bawah.`
+                    };
+                    messagesStore['mari_menulis'].push(infoReply);
+                    appendMessageToDOM(infoReply);
+                    renderEndSessionButton();
+                }, 500);
+            }
+        }
+
+        function renderEndSessionButton() {
+            const container = document.getElementById('messagesContainer');
+            
+            // Remove existing if any
+            const existing = document.getElementById('endSessionBtnContainer');
+            if (existing) existing.remove();
+
+            const btnWrapper = document.createElement('div');
+            btnWrapper.className = 'my-4 flex justify-center';
+            btnWrapper.id = 'endSessionBtnContainer';
+
+            btnWrapper.innerHTML = `
+                <button onclick="endSessionAndSwitchUser()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-5 rounded-full shadow-lg transition transform hover:scale-105 flex items-center gap-2 text-xs md:text-sm">
+                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                    <span>Selesai & Ganti Murid (Baris Baru Database)</span>
+                </button>
+            `;
+            container.appendChild(btnWrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function endSessionAndSwitchUser() {
+            // Increment auto row count for spreadsheet
+            const nextNo = writingState.data.noAuto + 1;
+
+            writingState = {
+                step: 0,
+                data: {
+                    noAuto: nextNo,
+                    nama: '',
+                    presensi: '',
+                    judul: '',
+                    abstrak: '',
+                    orientasi: '',
+                    krisis: '',
+                    reaksi: '',
+                    koda: '',
+                    timestamp: ''
+                }
+            };
+
+            const resetMsg = {
+                sender: 'bot',
+                time: getFormattedTime(),
+                text: `🔄 **SESI BERGANTI UNTUK USER / MURID BARU (Baris Database #${nextNo})**
+
+Selamat datang peserta didik berikutnya! 
+Silakan tuliskan **NAMA LENGKAP** kamu untuk mulai menginput karya Teks Anekdot:`
+            };
+
+            messagesStore['mari_menulis'].push(resetMsg);
+            renderMessages();
+            renderChatList();
+        }
+
+        async function submitToSpreadsheet(data) {
+            const targetUrl = customWebAppUrl || GOOGLE_APPS_SCRIPT_WEBAPP_URL;
+            console.log("Submitting record to Google Spreadsheet via Web App:", targetUrl, data);
+            
+            try {
+                // Attempt POST request to Google Apps Script Endpoint
+                await fetch(targetUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                console.log("Data successfully posted to Google Apps Script!");
+            } catch (err) {
+                console.warn("Spreadsheet webhook post notice:", err);
+            }
+        }
+
+        async function callGeminiAIForChat(chatId, userQuery) {
+            const chatConfig = chatData.find(c => c.id === chatId);
+            if (!chatConfig || !chatConfig.systemInstruction) return;
+
+            showTypingIndicator(true, `Asisten Gemini (${chatConfig.title}) sedang memproses...`);
+
+            // Build history context for Gemini API
+            const historyMsgs = messagesStore[chatId].slice(-6); // last 6 exchanges
+            const contents = historyMsgs.map(m => ({
+                role: m.sender === 'user' ? 'user' : 'model',
+                parts: [{ text: m.text }]
+            }));
+
+            const payload = {
+                contents: contents,
+                systemInstruction: {
+                    parts: [{ text: chatConfig.systemInstruction }]
+                }
+            };
+
+            const apiKey = userGeminiApiKey || "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetchWithBackoff(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                showTypingIndicator(false);
+
+                let botReplyText = "";
+                if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                    botReplyText = result.candidates[0].content.parts[0].text;
+                } else {
+                    botReplyText = "Mohon maaf, terjadi kendala saat mendapatkan tanggapan dari Gemini AI. Silakan coba kirim ulang pertanyaanmu.";
+                }
+
+                const botMsg = {
+                    sender: 'bot',
+                    time: getFormattedTime(),
+                    text: botReplyText
+                };
+
+                messagesStore[chatId].push(botMsg);
+                appendMessageToDOM(botMsg);
+
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                showTypingIndicator(false);
+
+                const fallbackMsg = {
+                    sender: 'bot',
+                    time: getFormattedTime(),
+                    text: `⚠️ *Koneksi AI Terganggu:* ${error.message || 'Tidak dapat terhubung ke layanan Gemini.'}\n\nPastikan Anda terhubung ke internet. Anda juga bisa mengatur Gemini API Key pribadi melalui tombol kunci (🔑) di pojok kanan atas.`
+                };
+                messagesStore[chatId].push(fallbackMsg);
+                appendMessageToDOM(fallbackMsg);
+            }
+        }
+
+        async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
+            try {
+                const res = await fetch(url, options);
+                if (!res.ok && res.status === 429 && retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithBackoff(url, options, retries - 1, delay * 2);
+                }
+                return res;
+            } catch (err) {
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithBackoff(url, options, retries - 1, delay * 2);
+                }
+                throw err;
+            }
+        }
+
+        function showTypingIndicator(show, text = "Gemini AI sedang mengetik...") {
+            const indicator = document.getElementById('typingIndicator');
+            const textSpan = document.getElementById('typingText');
+            if (show) {
+                textSpan.innerText = text;
+                indicator.classList.remove('hidden');
+            } else {
+                indicator.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initStore();
+            renderChatList();
+            switchChat('kbbi');
+
+            // Send message button click
+            document.getElementById('sendBtn').addEventListener('click', handleSendMessage);
+
+            // Send message on Enter key
+            document.getElementById('messageInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSendMessage();
+                }
+            });
+
+            // Back button on mobile
+            document.getElementById('backToListBtn').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('hidden');
+                document.getElementById('chatWindow').classList.add('hidden');
+            });
+
+            // Search input filter
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                renderChatList(e.target.value);
+            });
+
+            // Clear active chat
+            document.getElementById('clearChatBtn').addEventListener('click', () => {
+                const targetChat = chatData.find(c => c.id === activeChatId);
+                messagesStore[activeChatId] = [...targetChat.initialMessages];
+                renderMessages();
+                renderChatList();
+            });
+
+            // Modals Logic
+            const apiKeyModal = document.getElementById('apiKeyModal');
+            document.getElementById('apiKeyBtn').addEventListener('click', () => {
+                document.getElementById('customApiKeyInput').value = userGeminiApiKey;
+                document.getElementById('webAppUrlInput').value = customWebAppUrl || GOOGLE_APPS_SCRIPT_WEBAPP_URL;
+                apiKeyModal.classList.remove('hidden');
+            });
+            document.getElementById('closeApiModal').addEventListener('click', () => {
+                apiKeyModal.classList.add('hidden');
+            });
+            document.getElementById('saveApiKeyBtn').addEventListener('click', () => {
+                const key = document.getElementById('customApiKeyInput').value.trim();
+                const webUrl = document.getElementById('webAppUrlInput').value.trim();
+                if (key) userGeminiApiKey = key;
+                if (webUrl) {
+                    customWebAppUrl = webUrl;
+                    GOOGLE_APPS_SCRIPT_WEBAPP_URL = webUrl;
+                }
+                alert('Konfigurasi Pengaturan Berhasil Disimpan!');
+                apiKeyModal.classList.add('hidden');
+            });
+            document.getElementById('saveApiKeyBtn').addEventListener('click', () => {
+                const key = document.getElementById('customApiKeyInput').value.trim();
+                if (key) {
+                    userGeminiApiKey = key;
+                    alert('API Key berhasil disimpan!');
+                }
+                apiKeyModal.classList.add('hidden');
+            });
+
+            const guideModal = document.getElementById('guideModal');
+            document.getElementById('guideBtn').addEventListener('click', () => {
+                guideModal.classList.remove('hidden');
+            });
+            document.getElementById('closeGuideModal').addEventListener('click', () => {
+                guideModal.classList.add('hidden');
+            });
+            document.getElementById('closeGuideBtn2').addEventListener('click', () => {
+                guideModal.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
